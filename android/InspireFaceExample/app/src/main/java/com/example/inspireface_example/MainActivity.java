@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,10 +42,9 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = "InspireFace";
 
 
-
     void test() {
-        InspireFaceVersion version = InspireFace.QueryInspireFaceVersion();
-        Log.i(TAG, "InspireFace Version: " + version.major + "." + version.minor + "." + version.patch + " " + version.information);
+//        InspireFaceVersion version = InspireFace.QueryInspireFaceVersion();
+//        Log.i(TAG, "InspireFace Version: " + version.major + "." + version.minor + "." + version.patch + " " + version.information);
         String dbPath = "/storage/emulated/0/Android/data/com.example.inspireface_example/files/f.db";
         FeatureHubConfiguration configuration = InspireFace.CreateFeatureHubConfiguration()
                 .setEnablePersistence(false)
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         InspireFace.FeatureHubFaceSearchThresholdSetting(0.42f);
 
         String folder = InspireFace.copyResourceFileToApplicationDir(this);
-        Log.d(TAG, "Path: "+ folder);
+        Log.d(TAG, "Path: " + folder);
         boolean launchStatus = InspireFace.GlobalLaunch(folder + "/Pikachu");
         Log.d(TAG, "Launch status: " + launchStatus);
         if (!launchStatus) {
@@ -209,8 +210,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        //
-
-        test();
+        Button btn = findViewById(R.id.btn_test);
+        btn.setOnClickListener(v -> {
+            test();
+        });
     }
 }
