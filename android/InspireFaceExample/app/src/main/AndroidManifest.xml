@@ -3,11 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Phone information -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <!-- ************************************* -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Create and delete file permissions in SD card -->
-    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+
+    <uses-permission
+        android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"
         tools:ignore="ProtectedPermissions" />
 
     <application
@@ -19,16 +23,48 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.InspireFaceExample"
+        android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".FaceDetectActivity"
+            android:exported="true">
+
+        </activity>
+        <activity
+            android:name=".FeatureListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".FaceManagerActivity"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".FaceCompareActivity"
+            android:exported="false">
+        </activity>
+
+
+        <provider
+            android:name=".provider.ImagePickerProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/imagepicker" />
+        </provider>
+
+
     </application>
 
 </manifest>

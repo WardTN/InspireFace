@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <FrameLayout
+            android:id="@+id/ly_toolbar"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_gravity="bottom"
+            android:background="@color/face_analy_color">
+
+            <TextView
+                android:id="@+id/tv_title_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/face_manage"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/ly_add"
+            android:layout_width="wrap_content"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginTop="50dp"
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:background="@drawable/btn_add_bg"
+            app:layout_constraintTop_toBottomOf="@+id/ly_toolbar"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:background="@drawable/icon_plus"
+                android:layout_width="25dp"
+                android:backgroundTint="@color/white"
+                android:layout_height="25dp" />
+
+            <TextView
+                android:text="新增人员"
+                android:textColor="@color/white"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+
+        <com.example.inspireface_example.widget.InputTextView
+            android:id="@+id/input"
+            app:layout_constraintTop_toBottomOf="@+id/ly_add"
+
+            android:layout_margin="20dp"
+            android:hint="搜索姓名或部门"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recy"
+            app:layout_constraintTop_toBottomOf="@+id/input"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

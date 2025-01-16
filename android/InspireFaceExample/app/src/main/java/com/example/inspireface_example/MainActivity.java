@@ -1,6 +1,7 @@
 package com.example.inspireface_example;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -212,7 +213,8 @@ public class MainActivity extends AppCompatActivity {
 
         Button btn = findViewById(R.id.btn_test);
         btn.setOnClickListener(v -> {
-            test();
+//            test();
+            startActivity(new Intent(this, FeatureListActivity.class));
         });
     }
 }

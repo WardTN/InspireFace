@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">InspireFace-Example</string>
+    <string name="face_rec_system">人脸识别系统</string>
+    <string name="identification_desc">全方面人脸识别解决方案</string>
+    <string name="face_analy">人脸分析</string>
+    <string name="face_manage">Face Database Management</string>
 </resources>

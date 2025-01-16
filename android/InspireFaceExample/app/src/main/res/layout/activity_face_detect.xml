@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="com.example.inspireface_example.model.FaceAnalyModel" />
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/main"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".FaceDetectActivity">
+
+        <FrameLayout
+            android:id="@+id/ly_toolbar"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_gravity="bottom"
+            android:background="@color/face_analy_color">
+
+            <TextView
+                android:id="@+id/tv_title_main"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="FaceAnaly"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+        </FrameLayout>
+
+
+        <ImageView
+            android:layout_below="@+id/ly_toolbar"
+            android:layout_centerHorizontal="true"
+            android:layout_width="200dp"
+            android:src="@drawable/kun"
+            android:layout_marginTop="50dp"
+            android:layout_height="200dp"/>
+
+
+
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            app:cardCornerRadius="10dp"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_marginHorizontal="5dp"
+                android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:orientation="horizontal"
+                    android:layout_margin="@dimen/feature_item_margin"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/btn_take_photo"
+                        android:text="Take photo"
+                        android:src="@color/color_3"
+                        android:layout_width="0dp"
+                        android:layout_marginRight="5dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content" />
+
+                    <Button
+                        android:id="@+id/btn_album"
+                        android:text="Album"
+                        android:layout_width="0dp"
+                        android:layout_marginLeft="5dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/ly_tab"
+                    android:layout_width="match_parent"
+                    android:background="@color/face_analy_color"
+                    android:layout_marginBottom="10dp"
+                    android:layout_height="50dp"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:id="@+id/tab1"
+                        android:layout_width="0dp"
+                        android:onClick="@{()-> model.changeTab(1)}"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginHorizontal="@dimen/healthy_item_margin"
+                            android:src="@{model.tabIndex == 1 ? @drawable/tab_other_sel: @drawable/tab_bg}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:gravity="center"
+                            android:text="基础属性"
+                            android:textColor="@{model.tabIndex == 1 ? @color/black : @color/color_tab_unsel_text_color}"
+                            android:textSize="13sp"
+                            tools:ignore="NotSibling">
+
+                        </TextView>
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/tab2"
+                        android:layout_width="0dp"
+                        android:onClick="@{()-> model.changeTab(2)}"
+
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginHorizontal="@dimen/healthy_item_margin"
+                            android:src="@{model.tabIndex == 2 ? @drawable/tab_other_sel: @drawable/tab_bg}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:gravity="center"
+                            android:text="姿态角度"
+                            android:textColor="@{model.tabIndex == 2 ? @color/black : @color/color_tab_unsel_text_color}"
+                            android:textSize="13sp"
+                            tools:ignore="NotSibling">
+
+                        </TextView>
+                    </RelativeLayout>
+                    <RelativeLayout
+                        android:id="@+id/tab3"
+                        android:layout_width="0dp"
+                        android:onClick="@{()-> model.changeTab(3)}"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1">
+
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="40dp"
+                            android:layout_centerVertical="true"
+                            android:layout_marginHorizontal="@dimen/healthy_item_margin"
+                            android:src="@{model.tabIndex == 3 ? @drawable/tab_other_sel: @drawable/tab_bg}" />
+
+                        <TextView
+                            android:id="@+id/tv_treatment"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:gravity="center"
+                            android:text="图像质量"
+                            android:textColor="@{model.tabIndex == 3 ? @color/black : @color/color_tab_unsel_text_color}"
+                            android:textSize="13sp"
+                            tools:ignore="NotSibling">
+
+                        </TextView>
+                    </RelativeLayout>
+                </LinearLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/item_height"
+                    android:background="@drawable/face_analy_item_bg"
+                    android:layout_marginHorizontal="@dimen/feature_item_margin"
+                    android:layout_marginVertical="@dimen/face_analy_item_margin_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="@dimen/feature_item_margin"
+                        android:gravity="center"
+                        android:text="年龄" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:gravity="center"
+                        android:layout_marginRight="@dimen/feature_item_margin"
+                        android:text="60" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/item_height"
+                    android:layout_marginHorizontal="@dimen/feature_item_margin"
+                    android:layout_marginVertical="@dimen/face_analy_item_margin_vertical"
+                    android:background="@drawable/face_analy_item_bg"
+
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_marginLeft="@dimen/feature_item_margin"
+                        android:layout_height="match_parent"
+
+                        android:gravity="center"
+                        android:text="性别" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/feature_item_margin"
+
+                        android:gravity="center"
+                        android:text="女" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/item_height"
+                    android:background="@drawable/face_analy_item_bg"
+                    android:layout_marginHorizontal="@dimen/feature_item_margin"
+                    android:layout_marginVertical="@dimen/face_analy_item_margin_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="@dimen/feature_item_margin"
+
+                        android:gravity="center"
+                        android:text="微笑程度" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/feature_item_margin"
+
+                        android:gravity="center"
+                        android:text="50" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/item_height"
+                    android:background="@drawable/face_analy_item_bg"
+                    android:layout_marginHorizontal="@dimen/feature_item_margin"
+                    android:layout_marginVertical="@dimen/face_analy_item_margin_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="@dimen/feature_item_margin"
+                        android:gravity="center"
+                        android:text="左眼状态" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/feature_item_margin"
+
+                        android:gravity="center"
+                        android:text="睁眼,未戴眼镜" />
+                </RelativeLayout>
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/item_height"
+                    android:background="@drawable/face_analy_item_bg"
+                    android:layout_marginHorizontal="@dimen/feature_item_margin"
+                    android:layout_marginVertical="@dimen/face_analy_item_margin_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_marginLeft="@dimen/feature_item_margin"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="右眼状态" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="@dimen/feature_item_margin"
+                        android:gravity="center"
+                        android:text="睁眼,未戴眼镜" />
+                </RelativeLayout>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+
+    </RelativeLayout>
+</layout>
