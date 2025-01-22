@@ -1,13 +1,9 @@
 package com.example.inspireface_example;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -16,6 +12,8 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
 import com.insightface.sdk.inspireface.InspireFace;
 import com.insightface.sdk.inspireface.base.CustomParameter;
 import com.insightface.sdk.inspireface.base.FaceAttributeResult;
@@ -27,7 +25,6 @@ import com.insightface.sdk.inspireface.base.FaceMaskConfidence;
 import com.insightface.sdk.inspireface.base.FaceQualityConfidence;
 import com.insightface.sdk.inspireface.base.FeatureHubConfiguration;
 import com.insightface.sdk.inspireface.base.ImageStream;
-import com.insightface.sdk.inspireface.base.InspireFaceVersion;
 import com.insightface.sdk.inspireface.base.MultipleFaceData;
 import com.insightface.sdk.inspireface.base.Point2f;
 import com.insightface.sdk.inspireface.base.RGBLivenessConfidence;
@@ -35,8 +32,10 @@ import com.insightface.sdk.inspireface.base.SearchTopKResults;
 import com.insightface.sdk.inspireface.base.Session;
 import com.insightface.sdk.inspireface.utils.SDKUtils;
 
+import android.Manifest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -214,7 +213,20 @@ public class MainActivity extends AppCompatActivity {
         Button btn = findViewById(R.id.btn_test);
         btn.setOnClickListener(v -> {
 //            test();
-            startActivity(new Intent(this, FeatureListActivity.class));
+
+            if(XXPermissions.isGranted(this,Permission.CAMERA)){
+                startActivity(new Intent(this, RealTimeDetectActivity.class));
+            }else{
+                XXPermissions.with(this)
+                        .permission(Permission.CAMERA)
+                        .request((permissions, all) -> {
+                            if (all) {
+                                Log.d("XXPermissions", "获取所有权限成功");
+                            }
+                        });
+            }
+
+//            startActivity(new Intent(this, FeatureListActivity.class));
         });
     }
 }
