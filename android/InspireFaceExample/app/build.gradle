@@ -52,7 +52,13 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 
+    // Permission
     implementation 'com.github.getActivity:XXPermissions:20.0'
+
+    // Util
+    implementation 'com.blankj:utilcodex:1.30.5'
+
+
 }
 
 

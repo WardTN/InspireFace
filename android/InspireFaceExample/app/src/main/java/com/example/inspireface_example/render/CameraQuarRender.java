@@ -2,7 +2,6 @@ package com.example.inspireface_example.render;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -10,16 +9,18 @@ import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Surface;
 
 
+import com.blankj.utilcode.util.GsonUtils;
 import com.example.inspireface_example.R;
+import com.example.inspireface_example.bean.FaceRectAndLine;
+import com.insightface.inspireface_demo.utils.ListUtilKt;
 import com.solexcv.facelocatesdk.FaceLocate;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -30,18 +31,19 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
 
     private FloatBuffer vertexBuffer, mTexVertexBuffer;
 
-    private  ShortBuffer mVertexIndexBuffer;
+    private ShortBuffer mVertexIndexBuffer;
 
     private int mProgram;
 
     private int textureId;
 
+    private FaceLocate faceLocate;
+
     /**
      * 顶点坐标
      * (x,y,z)
      */
-    private float[] POSITION_VERTEX = new float[]{
-            0f, 0f, 0f,     //顶点坐标V0
+    private float[] POSITION_VERTEX = new float[]{0f, 0f, 0f,     //顶点坐标V0
             1f, 1f, 0f,     //顶点坐标V1
             -1f, 1f, 0f,    //顶点坐标V2
             -1f, -1f, 0f,   //顶点坐标V3
@@ -52,8 +54,7 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
      * 纹理坐标
      * (s,t)
      */
-    private static final float[] TEX_VERTEX = {
-            0.5f, 0.5f, //纹理坐标V0
+    private static final float[] TEX_VERTEX = {0.5f, 0.5f, //纹理坐标V0
             1f, 1f,     //纹理坐标V1
             0f, 1f,     //纹理坐标V2
             0f, 0.0f,   //纹理坐标V3
@@ -62,8 +63,7 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
     /**
      * 索引
      */
-    private static final short[] VERTEX_INDEX = {
-            0, 1, 2,  //V0,V1,V2 三个顶点组成一个三角形
+    private static final short[] VERTEX_INDEX = {0, 1, 2,  //V0,V1,V2 三个顶点组成一个三角形
             0, 2, 3,  //V0,V2,V3 三个顶点组成一个三角形
             0, 3, 4,  //V0,V3,V4 三个顶点组成一个三角形
             0, 4, 1   //V0,V4,V1 三个顶点组成一个三角形
@@ -111,16 +111,17 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         vertexBuffer = GLDataUtil.createFloatBuffer(POSITION_VERTEX);
         mTexVertexBuffer = GLDataUtil.createFloatBuffer(TEX_VERTEX);
 
-        mVertexIndexBuffer =  GLDataUtil.createShortBuffer(VERTEX_INDEX);
+        mVertexIndexBuffer = GLDataUtil.createShortBuffer(VERTEX_INDEX);
+
+        faceLocate = new FaceLocate(glSurfaceView.getContext());
+
     }
 
     private void setCameraDisplayOrientation(int cameraId, Camera camera) {
         Activity targetActivity = (Activity) mGLSurfaceView.getContext();
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = targetActivity.getWindowManager().getDefaultDisplay()
-                .getRotation();
+        int rotation = targetActivity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0:
@@ -170,6 +171,7 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         //设置SurfaceTexture作为相机预览输出
         try {
             mCamera.setPreviewTexture(mSurfaceTexture);
+            mCamera.setPreviewCallback(this);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -216,9 +218,9 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         mSurfaceTexture.updateTexImage();
         mSurfaceTexture.getTransformMatrix(transformMatrix);
 
-//        //激活纹理单元0
+//        激活纹理单元0
 //        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-//        //绑定外部纹理到纹理单元0
+//        绑定外部纹理到纹理单元0
 //        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
         //将此纹理单元床位片段着色器的uTextureSampler外部纹理采样器
 //        GLES30.glUniform1i(uTextureSamplerLocation, 0);
@@ -258,13 +260,76 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
+        Camera.Parameters parameters = camera.getParameters();
+        Camera.Size size = parameters.getPreviewSize();
 
+//        Log.e("CHEN","当前Camera height:" + size.height + "  width:" + size.width);
+
+        int hasFace = faceLocate.predictFaceInImg(data, size.height, size.width);
+
+        if (hasFace == 1) {
+            String resultRect = faceLocate.getFaceRectAndLine(data, size.height, size.width);
+
+            if (!TextUtils.isEmpty(resultRect)) {
+
+                FaceRectAndLine boxBean = GsonUtils.fromJson(resultRect, FaceRectAndLine.class);
+
+                Rect rect = new Rect(boxBean.getFace_box().getLeft_up().get(0), boxBean.getFace_box().getLeft_up().get(1), boxBean.getFace_box().getRight_down().get(0), boxBean.getFace_box().getRight_down().get(1));
+
+                int topX = boxBean.getFace_box().getLeft_up().get(0);
+                int topY = boxBean.getFace_box().getLeft_up().get(1);
+
+                int bottomX = boxBean.getFace_box().getRight_down().get(0);
+                int bottomY = boxBean.getFace_box().getRight_down().get(1);
+
+//                Log.e("CHEN", "topX:" + topX + "  topY:" + topY + "  bottomX:" + bottomX + "  bottomY:" + bottomY);
+
+                Rect flipRect = flipRectPointW(rect, size.width);
+
+//                Log.e("CHEN", "X :" + flipRect.centerX() + "  Y:" + flipRect.centerY());
+
+                float rectCenterX = flipRect.left + (flipRect.width() / 2f);
+                float rectCenterY = flipRect.top + (flipRect.height() / 2f);
+//
+//                // 得到矩阵中心占屏幕上的比例
+//                float x = rectCenterX / (float) size.width;
+//                float y = rectCenterY / (float) size.height;
+//
+////                Log.e("CHEN", " 当前中心点 x:" + x + "           y:" + y);
+//
+//                // 得到矩阵长宽在屏幕上的比例
+//                float widthRation = (float) flipRect.width() / (float) size.width;
+//                float heightRation = (float) flipRect.height() / (float) size.height;
+//
+//                if (!ListUtilKt.listIsEmp(boxBean.getFace_six_region())) {
+//                    render.setPointFS(boxBean, size.width, size.height);
+//                }
+            }
+        }
     }
 
     TriangleRender render;
 
     public void setTrainRender(TriangleRender render) {
         this.render = render;
+    }
+
+
+    static public Rect flipRectPointW(Rect rect, int width) {
+        if (rect == null) return null;
+        int x1 = width - rect.right;
+        int x2 = width - rect.left;
+        return new Rect(x1, rect.top, x2, rect.bottom);
+    }
+
+    static public Rect swapRectScale(Rect rect, int width, int height) {
+        int x1 = (int) (((float) rect.left / width) * height);
+        int y1 = (int) (((float) rect.top / height) * width);
+
+        int x2 = (int) (((float) rect.right / width) * height);
+        int y2 = (int) (((float) rect.bottom / height) * width);
+
+        return new Rect(x1, y1, x2, y2);
     }
 
 
