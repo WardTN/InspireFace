@@ -288,6 +288,9 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
 
 //                Log.e("CHEN", "X :" + flipRect.centerX() + "  Y:" + flipRect.centerY());
 
+                render.setRect(size.width, size.height, flipRect.centerX(), flipRect.centerY(), flipRect.width(), flipRect.height());
+
+
                 float rectCenterX = flipRect.left + (flipRect.width() / 2f);
                 float rectCenterY = flipRect.top + (flipRect.height() / 2f);
 //

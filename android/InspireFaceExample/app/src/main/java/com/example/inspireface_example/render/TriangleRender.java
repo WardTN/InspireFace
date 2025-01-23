@@ -4,6 +4,7 @@ import static com.insightface.inspireface_demo.utils.ListUtilKt.listIsEmp;
 
 import android.opengl.GLES30;
 import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
 
 import com.example.inspireface_example.bean.FaceRectAndLine;
 
@@ -18,107 +19,110 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class TriangleRender extends AbsObjectRender {
 
-    private static final String VERTEX_SHADER_CODE =
-            "attribute vec4 vPosition;" +
-                    "void main() {" +
-                    "  gl_Position = vPosition;" +
-                    "}";
+    private FloatBuffer vertexBuffer;
+    private int program;
+    private float[] mvpMatrix = new float[16];
+    private float[] tempMatrix = new float[16];
 
-    private static final String FRAGMENT_SHADER_CODE =
-            "precision mediump float;" +
-                    "uniform vec4 vColor;" +
-                    "void main() {" +
-                    "  gl_FragColor = vColor;" +
-                    "}";
+    // 动态位置和尺寸
+    private float positionX = 0f; // 中心点 X
+    private float positionY = 0f; // 中心点 Y
+    private float width = 0.2f; // 矩形宽度
+    private float height = 0.2f; // 矩形高度
 
-    // 矩形的顶点坐标
-    ArrayList<Float> pointFList = new ArrayList<>();
-
-
-    // 索引数据
-    private final short[] drawOrder = {
-            0, 1, 2, // 第一个三角形
-            0, 2, 3  // 第二个三角形
+    // 顶点数据模板（单位矩形，中心为 (0, 0)）
+    private float[] baseVertices = {
+            -0.5f, 0.5f, 0.0f,   // 左上
+            -0.5f, -0.5f, 0.0f,  // 左下
+            0.5f, 0.5f, 0.0f,    // 右上
+            0.5f, -0.5f, 0.0f    // 右下
     };
 
-    // 颜色 (RGBA)
-    private final float[] color = {0.0f, 1.0f, 0.0f, 1.0f}; // 绿色
-
-    private FloatBuffer vertexBuffer;
-    private ShortBuffer drawListBuffer;
-
-    private int positionHandle;
-    private int colorHandle;
+    // 初始化 OpenGL 程序
+    String vertexShaderCode = "uniform mat4 uMVPMatrix;" +
+            "attribute vec4 vPosition;" +
+            "void main() {" +
+            "  gl_Position = uMVPMatrix * vPosition;" +
+            "}";
+    String fragmentShaderCode = "precision mediump float;" +
+            "uniform vec4 vColor;" +
+            "void main() {" +
+            "  gl_FragColor = vColor;" +
+            "}";
 
     @Override
     public void initProgram() {
 
-        pointFList.add(0.1f);
-        pointFList.add(0.1f);
-        pointFList.add(0f);
+        int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, vertexShaderCode);
+        int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        program = GLES30.glCreateProgram();
+        GLES30.glAttachShader(program, vertexShader);
+        GLES30.glAttachShader(program, fragmentShader);
+        GLES30.glLinkProgram(program);
 
-        pointFList.add(-0.1f);
-        pointFList.add(0.1f);
-        pointFList.add(0f);
+        // 初始化顶点缓冲
+        vertexBuffer = ByteBuffer.allocateDirect(baseVertices.length * 4)
+                .order(ByteOrder.nativeOrder())
+                .asFloatBuffer();
 
-        pointFList.add(-0.1f);
-        pointFList.add(-0.1f);
-        pointFList.add(0f);
-
-        pointFList.add(0.1f);
-        pointFList.add(-0.1f);
-        pointFList.add(0f);
-
-
-        // 初始化顶点字节缓冲
-//        ByteBuffer bb = ByteBuffer.allocateDirect(rectangleCoords.length * 4);
-//        bb.order(ByteOrder.nativeOrder());
-//        vertexBuffer = bb.asFloatBuffer();
-//        vertexBuffer.put(rectangleCoords);
-//        vertexBuffer.position(0);
-
-
-        // 初始化索引字节缓冲
-        ByteBuffer dlb = ByteBuffer.allocateDirect(drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
-
-        // 加载着色器并创建程序
-        int vertexShader = loadShader(GLES30.GL_VERTEX_SHADER, VERTEX_SHADER_CODE);
-        int fragmentShader = loadShader(GLES30.GL_FRAGMENT_SHADER, FRAGMENT_SHADER_CODE);
-
-        mProgram = GLES30.glCreateProgram();
-        GLES30.glAttachShader(mProgram, vertexShader);
-        GLES30.glAttachShader(mProgram, fragmentShader);
-        GLES30.glLinkProgram(mProgram);
+        Matrix.setIdentityM(mvpMatrix, 0);
+        updateVertexBuffer();
     }
+
+
+    // 更新顶点缓冲
+    private void updateVertexBuffer() {
+        vertexBuffer.clear();
+        vertexBuffer.put(baseVertices);
+        vertexBuffer.position(0);
+    }
+
+    // 动态设置矩形位置和尺寸
+    public void setRect(float screenWidth,float screenHeight,float x, float y, float width, float height) {
+        this.positionX = x;
+        this.positionY = y;
+        this.width = width;
+        this.height = height;
+
+        //将位置 （x,y） 转换为归一化坐标系 【-1,1】
+        float normalizedX = (2 * (x / screenWidth)) - 1;;
+        float normalizedY = 1 - (2 * (y / screenHeight));;
+
+        // 将矩形的宽度和高度转换为归一化坐标
+        float normalizedWidth = 2 * (width / screenWidth);  // 宽度归一化
+        float normalizedHeight = 2 * (height / screenHeight); // 高度归一化
+
+        // 更新矩形的位置和尺寸
+        this.positionX = normalizedX;
+        this.positionY = normalizedY;
+        this.width = normalizedWidth;
+        this.height = normalizedHeight;
+
+    }
+
 
     @Override
     public void onDrawFrame(GL10 gl) {
-        // 使用编译好的程序
-        GLES30.glUseProgram(mProgram);
 
-        // 获取位置句柄
-        positionHandle = GLES30.glGetAttribLocation(mProgram, "vPosition");
+        GLES30.glUseProgram(program);
 
-        // 启用顶点属性
-        GLES30.glEnableVertexAttribArray(positionHandle);
-
-        vertexBuffer = GLDataUtil.createFloatBuffer(pointFList);
+        // 更新矩阵：平移 + 缩放
+        Matrix.setIdentityM(tempMatrix, 0);
+        Matrix.translateM(tempMatrix, 0, positionX, positionY, 0f);
+        Matrix.scaleM(tempMatrix, 0, this.width, this.height, 1f);
+        GLES30.glUniformMatrix4fv(GLES30.glGetUniformLocation(program, "uMVPMatrix"), 1, false, tempMatrix, 0);
 
         // 设置顶点数据
+        int positionHandle = GLES30.glGetAttribLocation(program, "vPosition");
+        GLES30.glEnableVertexAttribArray(positionHandle);
         GLES30.glVertexAttribPointer(positionHandle, 3, GLES30.GL_FLOAT, false, 0, vertexBuffer);
 
-        // 获取颜色句柄
-        colorHandle = GLES30.glGetUniformLocation(mProgram, "vColor");
-
         // 设置颜色
-        GLES30.glUniform4fv(colorHandle, 1, color, 0);
+        int colorHandle = GLES30.glGetUniformLocation(program, "vColor");
+        GLES30.glUniform4fv(colorHandle, 1, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
 
         // 绘制矩形
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, drawOrder.length, GLES30.GL_UNSIGNED_SHORT, drawListBuffer);
+        GLES30.glDrawArrays(GLES30.GL_TRIANGLE_STRIP, 0, 4);
 
         // 禁用顶点数组
         GLES30.glDisableVertexAttribArray(positionHandle);
@@ -133,13 +137,7 @@ public class TriangleRender extends AbsObjectRender {
     }
 
     public void setPointFS(FaceRectAndLine faceRectAndLine, int width, int height){
-        ArrayList<Float> pointS = new ArrayList();
-        if (!listIsEmp(faceRectAndLine.getFace_six_region())) {
-            List<Float> pos1 = addFaceRegionPos(faceRectAndLine.getFace_six_region(), 1, width, height);
-            pointS.addAll(pos1);
-        }
-        pointFList.clear();
-        pointFList.addAll(pointS);
+
     }
 
 
