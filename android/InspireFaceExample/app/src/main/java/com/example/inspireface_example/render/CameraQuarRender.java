@@ -59,7 +59,6 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
             0f, 0.0f,   //纹理坐标V3
             1f, 0.0f    //纹理坐标V4
     };
-
     /**
      * 索引
      */
@@ -160,12 +159,23 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         //绑定到外部纹理上
         GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, tex[0]);
         //设置纹理过滤参数
-        GLES30.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_NEAREST);
+        GLES30.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES30.GL_TEXTURE_MIN_FILTER, GLES30.GL_LINEAR);
         GLES30.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES30.GL_TEXTURE_MAG_FILTER, GLES30.GL_LINEAR);
         GLES30.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES30.GL_TEXTURE_WRAP_S, GLES30.GL_CLAMP_TO_EDGE);
         GLES30.glTexParameterf(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, GLES30.GL_TEXTURE_WRAP_T, GLES30.GL_CLAMP_TO_EDGE);
-        //解除纹理绑定
-        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, 0);
+
+        //根据纹理ID创建SurfaceTexture
+        mSurfaceTexture = new SurfaceTexture(tex[0]);
+        mSurfaceTexture.setOnFrameAvailableListener(surfaceTexture -> mGLSurfaceView.requestRender());
+        //设置SurfaceTexture作为相机预览输出
+        try {
+            mCamera.setPreviewTexture(mSurfaceTexture);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        //开启相机预览
+        mCamera.startPreview();
+
         return tex[0];
     }
 
@@ -186,8 +196,6 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
 
         //加载纹理
         textureId = loadTexture();
-        //加载SurfaceTexture
-        loadSurfaceTexture(textureId);
 
         super.onSurfaceCreated(gl, config);
     }
@@ -208,12 +216,12 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         mSurfaceTexture.updateTexImage();
         mSurfaceTexture.getTransformMatrix(transformMatrix);
 
-        //激活纹理单元0
-        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
-        //绑定外部纹理到纹理单元0
-        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
+//        //激活纹理单元0
+//        GLES30.glActiveTexture(GLES30.GL_TEXTURE0);
+//        //绑定外部纹理到纹理单元0
+//        GLES30.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textureId);
         //将此纹理单元床位片段着色器的uTextureSampler外部纹理采样器
-        GLES30.glUniform1i(uTextureSamplerLocation, 0);
+//        GLES30.glUniform1i(uTextureSamplerLocation, 0);
 
         //将纹理矩阵传给片段着色器
         GLES30.glUniformMatrix4fv(uTextureMatrixLocation, 1, false, transformMatrix, 0);
@@ -225,7 +233,9 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
         GLES30.glVertexAttribPointer(1, 2, GLES30.GL_FLOAT, false, 0, mTexVertexBuffer);
 
         // 绘制
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, VERTEX_INDEX.length, GLES20.GL_UNSIGNED_SHORT, mVertexIndexBuffer);
+        GLES20.glDrawElements(GLES30.GL_TRIANGLES, VERTEX_INDEX.length, GLES30.GL_UNSIGNED_SHORT, mVertexIndexBuffer);
+
+        GLES30.glUseProgram(0);
 
         super.onDrawFrame(gl);
     }
@@ -251,9 +261,9 @@ public class CameraQuarRender extends BaseCameraRenderer implements Camera.Previ
 
     }
 
-    FaceRectRender render;
+    TriangleRender render;
 
-    public void setTrainRender(FaceRectRender render) {
+    public void setTrainRender(TriangleRender render) {
         this.render = render;
     }
 

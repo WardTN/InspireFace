@@ -10,7 +10,7 @@ import android.util.AttributeSet;
 public class CameraGLSurface extends GLSurfaceView implements SurfaceTexture.OnFrameAvailableListener {
 
     private CameraQuarRender render;
-    private FaceRectRender faceRectRender;
+    private TriangleRender faceRectRender;
     private FacePointRender facePointRender;
 
     public CameraGLSurface(Context context) {
@@ -27,26 +27,27 @@ public class CameraGLSurface extends GLSurfaceView implements SurfaceTexture.OnF
     private void init(Context context) {
         setEGLContextClientVersion(3);
         render = new CameraQuarRender(this);
+
         setRenderer(render);
         setRenderMode(RENDERMODE_CONTINUOUSLY);
 
-//        initTrain();
-        //        initPoint();
+        initTrain();
+//                initPoint();
     }
 
 
     private void initTrain() {
-        faceRectRender = new FaceRectRender();
+        faceRectRender = new TriangleRender();
         render.setObjectRender(faceRectRender);
         //将三角形和 CameraRender连接
         render.setTrainRender(faceRectRender);
     }
 
-//    private void initPoint() {
-//        facePointRender = new FacePointRender();
-//        render.setObjectRender(facePointRender);
+    private void initPoint() {
+        facePointRender = new FacePointRender();
+        render.setObjectRender(facePointRender);
 //        render.setDotRener(facePointRender);
-//    }
+    }
 
 
 //    public void setObjectRender(AbsObjectRender absObjectRender) {

@@ -10,3 +10,5 @@ void main() {
      float fGrayColor = (0.3*vCameraColor.r + 0.59*vCameraColor.g + 0.11*vCameraColor.b);
      vFragColor = vec4(fGrayColor, fGrayColor, fGrayColor, 1.0);
 }
+
+

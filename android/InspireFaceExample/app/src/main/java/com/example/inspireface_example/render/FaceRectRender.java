@@ -5,7 +5,6 @@ import android.opengl.GLES30;
 import android.opengl.Matrix;
 import android.util.Log;
 
-
 import com.example.inspireface_example.R;
 
 import java.nio.FloatBuffer;
@@ -64,15 +63,6 @@ public class FaceRectRender extends AbsObjectRender {
     private float scaleY = 1f;
 
 
-    /**
-     * 矩阵索引
-     */
-    private int uTextureMatrixLocation;
-
-    private int uTextureSamplerLocation;
-
-
-
     @Override
     public void initProgram() {
         //三角形绘制相关初始化
@@ -90,17 +80,13 @@ public class FaceRectRender extends AbsObjectRender {
         //编译片段着色程序
         String fragTriShaderStr = ResReadUtils.readResource(R.raw.fragment_base_common_shader);
         int fragTriShaderId = ShaderUtils.compileFragmentShader(fragTriShaderStr);
-
         //连接程序
         mProgram = ShaderUtils.linkProgram(verTriShaderId, fragTriShaderId);
-        Log.e(TAG, "FaceRectRender: initProgram");
-
         if (mProgram == 0) {
             Log.e(TAG, "initProgram: 初始化失败");
         } else {
             Log.e(TAG, "initProgram: 初始化成功" + mProgram);
         }
-
     }
 
     @Override
@@ -118,7 +104,7 @@ public class FaceRectRender extends AbsObjectRender {
         // 将前面计算得到的mMVPMatrix(frustumM setLookAtM 通过multiplyMM 相乘得到的矩阵) 传入vMatrix中，与顶点矩阵进行相乘
         GLES30.glUniformMatrix4fv(uMaxtrixLocation, 1, false, mvpMatrix, 0);
 
-        int aPositionLocation = GLES30.glGetAttribLocation(mProgram, "vPosition");
+        int aPositionLocation = GLES30.glGetAttribLocation(mProgram, "rectPostion");
         GLES30.glEnableVertexAttribArray(aPositionLocation);
         //x y z 所以数据size 是3
         GLES30.glVertexAttribPointer(aPositionLocation, 3, GLES30.GL_FLOAT, false, 0, vertexBuffer);
@@ -131,12 +117,12 @@ public class FaceRectRender extends AbsObjectRender {
 
         GLES30.glLineWidth(5.0f);
 //        GLES30.glDrawArrays(GLES30.GL_TRIANGLES, 0, vertexCoords.length / 3);
-        GLES30.glDrawElements(GLES30.GL_TRIANGLES, indices.length, GLES30.GL_UNSIGNED_SHORT, indexBuffer);
+//        GLES30.glDrawElements(GLES30.GL_TRIANGLES, indices.length, GLES30.GL_UNSIGNED_SHORT, indexBuffer);
 
         //禁止顶点数组的句柄
-        GLES30.glDisableVertexAttribArray(aPositionLocation);
-        GLES30.glDisableVertexAttribArray(aColorLocation);
-        GLES30.glUseProgram(0);
+//        GLES30.glDisableVertexAttribArray(aPositionLocation);
+//        GLES30.glDisableVertexAttribArray(aColorLocation);
+//        GLES30.glUseProgram(mProgram);
     }
 
     /**
